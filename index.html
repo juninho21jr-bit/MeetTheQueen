@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Find The Queen 🔥</title>
+  <meta name="description" content="Digite a senha certa para desbloquear a surpresa!" />
+  <style>
+    :root {
+      --bg: #0a0d1a;
+      --card: rgba(18,21,39,0.5); /* caixa com 50% opacidade */
+      --muted: #9aa0a6;
+      --text: #e9eaee;
+      --accent: #fb923c; /* laranja */
+      --ok: #22c55e;
+      --err: #ef4444;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      color: var(--text);
+      background: url("https://www.graphicsfuel.com/wp-content/uploads/2023/09/heatmap-photo-effect.jpg") no-repeat center center fixed;
+      background-size: cover;
+      min-height: 100dvh; display: grid; place-items: center; padding: 24px;
+      position: relative;
+    }
+
+    .card {
+      width: 100%; max-width: 520px; 
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.1); 
+      border-radius: 24px; 
+      padding: 28px; 
+      box-shadow: 0 20px 80px rgba(0,0,0,0.45);
+      backdrop-filter: blur(6px); 
+      position: relative; 
+      z-index: 1;
+    }
+    h1 { font-size: clamp(22px, 3.2vw, 30px); margin: 0 0 6px; letter-spacing: 0.2px; }
+    p { margin: 0; color: var(--muted); }
+
+    .field { margin-top: 18px; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    input[type=password] {
+      width: 100%; padding: 14px 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);
+      background: #0f1116; color: var(--text); outline: none; font-size: 16px;
+    }
+    input::placeholder { color: #7b8191; }
+    button {
+      padding: 12px 16px; border-radius: 14px; border: 0; font-weight: 600; cursor: pointer; font-size: 15px;
+      background: linear-gradient(180deg, var(--accent), #ea580c); color: white; box-shadow: 0 8px 24px rgba(234,88,12,0.35);
+    }
+    .hint { margin-top: 10px; font-size: 14px; color: #c7c9d1; }
+    .status { margin-top: 12px; font-size: 14px; min-height: 20px; }
+    .status.ok { color: var(--ok); }
+    .status.err { color: var(--err); }
+
+    .reveal { display: none; margin-top: 18px; background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+      padding: 14px; border-radius: 16px; }
+    .reveal img { width: 100%; height: auto; border-radius: 12px; display: block; }
+
+    .footer { margin-top: 14px; font-size: 12px; color: #a9aabc; text-align: center; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px;
+      background: rgba(251,146,60,0.15); border: 1px solid rgba(251,146,60,0.35); color: #ffdab6; font-size: 12px; }
+
+    /* Emojis caindo */
+    .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 2; }
+    .confetti span {
+      position: absolute;
+      font-size: 24px;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); opacity: 0.9; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div style="display:flex; align-items:center; justify-content: space-between; gap: 12px;">
+      <div>
+        <h1>Find The Queen 🔥</h1>
+        <p>Descubra a senha e desbloqueie a queen</p>
+      </div>
+      <span class="badge" aria-hidden="true">Acesso com senha</span>
+    </div>
+
+    <div class="field">
+      <input id="pw" type="password" placeholder="Digite a senha" autocomplete="off" />
+      <button id="go" type="button">Desbloquear</button>
+    </div>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+
+    <div id="reveal" class="reveal" aria-hidden="true">
+      <img id="revealImg" src="https://i.ibb.co/s9CSjz8q/LAVINIA.png" alt="Surpresa revelada" />
+    </div>
+
+    <div class="footer">Dica: <span id="hintText">Ela é mãe, ela é filha, ela é roxa, mas também é negra</span></div>
+  </div>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+
+  <script>
+    const PASSWORD = 'Lavínia';
+
+    const pw = document.getElementById('pw');
+    const go = document.getElementById('go');
+    const statusEl = document.getElementById('status');
+    const reveal = document.getElementById('reveal');
+    const confetti = document.getElementById('confetti');
+
+    function tryUnlock() {
+      const val = pw.value.trim();
+      if (!val) { setStatus('Digite a senha.'); return; }
+      if (val === PASSWORD) {
+        unlock();
+      } else {
+        setStatus('Senha incorreta. Tente novamente.');
+        wobble(statusEl);
+      }
+    }
+
+    function setStatus(text, ok=false) {
+      statusEl.textContent = text;
+      statusEl.className = 'status ' + (ok ? 'ok' : 'err');
+    }
+
+    function unlock() {
+      setStatus('✅ Acesso liberado!', true);
+      reveal.style.display = 'block';
+      reveal.setAttribute('aria-hidden', 'false');
+      rainFire();
+    }
+
+    function wobble(el) {
+      el.animate([
+        { transform: 'translateX(0)' },
+        { transform: 'translateX(-6px)' },
+        { transform: 'translateX(6px)' },
+        { transform: 'translateX(0)' }
+      ], { duration: 220, iterations: 1 });
+    }
+
+    function rainFire() {
+      for (let i = 0; i < 80; i++) {
+        const flame = document.createElement('span');
+        flame.textContent = '🔥';
+        flame.style.left = Math.random() * 100 + 'vw';
+        flame.style.top = '-5vh';
+        flame.style.fontSize = (20 + Math.random() * 20) + 'px';
+        flame.style.animationDuration = (1500 + Math.random()*1500) + 'ms';
+        flame.style.opacity = 0.8 + Math.random()*0.2;
+        flame.style.transform = `rotate(${Math.random()*360}deg)`;
+        flame.style.animationName = 'fall';
+        confetti.appendChild(flame);
+        setTimeout(() => flame.remove(), 4000);
+      }
+    }
+
+    go.addEventListener('click', tryUnlock);
+    pw.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+  </script>
+</body>
+</html>
